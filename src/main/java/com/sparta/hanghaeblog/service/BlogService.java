@@ -1,16 +1,21 @@
 package com.sparta.hanghaeblog.service;
 
 
-        import com.sparta.hanghaeblog.dto.BlogRequestDto;
-        import com.sparta.hanghaeblog.dto.NewDto;
-        import com.sparta.hanghaeblog.entity.Blog;
-        import com.sparta.hanghaeblog.repository.BlogRepository;
-        import lombok.RequiredArgsConstructor;
-        import org.springframework.stereotype.Service;
-        import org.springframework.transaction.annotation.Transactional;
+import com.sparta.hanghaeblog.dto.BlogRequestDto;
+import com.sparta.hanghaeblog.dto.BlogResponseDto;
+import com.sparta.hanghaeblog.entity.Blog;
+import com.sparta.hanghaeblog.jwt.JwtUtil;
+import com.sparta.hanghaeblog.repository.BlogRepository;
+import com.sparta.hanghaeblog.repository.UserRepository;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.sparta.hanghaeblog.entity.User;
 
-        import java.util.ArrayList;
-        import java.util.List;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
@@ -18,14 +23,34 @@ package com.sparta.hanghaeblog.service;
 public class BlogService {
 
     private final BlogRepository blogRepository;
+    private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
 
-    @Transactional
-    public NewDto createMemo(BlogRequestDto requestDto) {
-        Blog blog = new Blog(requestDto);
-        blogRepository.save(blog);
-        NewDto newDto = new NewDto(blog);
+    //    @Transactional
+    public BlogResponseDto createBlog(BlogRequestDto requestDto, HttpServletRequest request) {
+        // Request에서 Token 가져오기
+        String token = jwtUtil.resolveToken(request);
+        Claims claims;
 
-        return newDto;
+        // 토큰이 있는 경우에만 동작할거야
+        if (token != null) {
+            if (jwtUtil.validateToken(token)) {
+                // 토큰에서 사용자 정보 가져오기
+                claims = jwtUtil.getUserInfoFromToken(token);
+            } else {
+                throw new IllegalArgumentException("Token Error");
+            }
+
+            // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
+            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
+                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+            );
+            Blog blog = new Blog(requestDto, user);
+            blogRepository.save(blog);
+
+            return new BlogResponseDto(blog);
+        }
+        return null;
     }
 
 //    @Transactional(readOnly = true)
@@ -33,63 +58,94 @@ public class BlogService {
 //        return memoRepository.findAllByOrderByCreatedAtDesc();
 //    }
 
-//    @Transactional(readOnly = true)
+    //    @Transactional(readOnly = true)
+    public List<BlogResponseDto> getBlogs() {
+        List<BlogResponseDto> blogResponseDtos = new ArrayList<>();
+        try {
+            List<Blog> blogs = blogRepository.findAllByOrderByCreatedAtDesc();
+            for (Blog blog : blogs) {
+                if (blog.getIsDeleted() == null) {
+                    BlogResponseDto blogResponseDto = new BlogResponseDto(blog);
+                    blogResponseDtos.add(blogResponseDto);
+                }
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();   // 예외가 어디서 어떻게 생기는지 보여주라 !
+        }
+        return blogResponseDtos;
+    }
+
+    //    @Transactional(readOnly = true)
 //    public List<NewDto> getMemos() {
-//        List<Memo> memos = memoRepository.findAllByOrderByCreatedAtDesc();
 //        List<NewDto> newDtos = new ArrayList<>();
-//        for (Memo memo : memos){
-//            NewDto newDto = new NewDto(memo);
-//            newDtos.add(newDto);
+//        try {
+//            List<Blog> blogs = blogRepository.findAllByOrderByCreatedAtDesc();
+//            for (int i = 0; i < blogs.size(); i++) {
+//                newDtos.add(new NewDto(blogs.get(i)));
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();   //예외가 어디서 어떻게 생겼는 지 알려줌
 //        }
 //        return newDtos;
 //    }
-
-    @Transactional(readOnly = true)
-    public List<NewDto> getMemos() {
-        List<NewDto> newDtos = new ArrayList<>();
-        try {
-            List<Blog> blogs = blogRepository.findAllByOrderByCreatedAtDesc();
-            for (int i = 0; i < blogs.size(); i++) {
-                newDtos.add(new NewDto(blogs.get(i)));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();   //예외가 어디서 어떻게 생겼는 지 알려줌
-        }
-        return newDtos;
-    }
     @Transactional
-    public NewDto getMemo(Long id) {
+    public BlogResponseDto getBlog(Long id) {
         Blog target = blogRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
         );
-        NewDto newDto = new NewDto(target);
 
-        return newDto;
+        return new BlogResponseDto(target);
     }
 
     @Transactional
-    public NewDto update(Long id, BlogRequestDto requestDto) {
+    public BlogResponseDto update(Long id, BlogRequestDto requestDto, HttpServletRequest request) {
+        String token = jwtUtil.resolveToken(request);
+        Claims claims;
         Blog blog = blogRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
         );
-        if (blog.getPassword().equals(requestDto.getPassword())) {
+        // 토큰이 있는 경우에만 동작할거야
+        if (token != null) {
+            if (jwtUtil.validateToken(token)) {
+                // 토큰에서 사용자 정보 가져오기
+                claims = jwtUtil.getUserInfoFromToken(token);
+            } else {
+                throw new IllegalArgumentException("Token Error");
+            }
+
+            // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
+            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
+                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+            );
             blog.update(requestDto);
         }
-        NewDto newDto = new NewDto(blog);
-        return newDto;
+        return new BlogResponseDto(blog);
     }
 
     @Transactional
-    public String deleteMemo(Long id, BlogRequestDto requestDto) {
+    public String deleteBlog(Long id, HttpServletRequest request) {
+        String token = jwtUtil.resolveToken(request);
+        Claims claims;
+
         Blog blog = blogRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
         );
-        if (blog.getPassword().equals(requestDto.getPassword())) {
-            blogRepository.deleteById(id);
-            return "삭제되었습니다.";
-        }else{
-            return "비밀번호가 일치하지 않습니다.";
-        }
 
+        if (token != null) {
+            if (jwtUtil.validateToken(token)) {
+                // 토큰에서 사용자 정보 가져오기
+                claims = jwtUtil.getUserInfoFromToken(token);
+            } else {
+                throw new IllegalArgumentException("Token Error");
+            }
+
+            // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
+            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
+                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+            );
+            return "삭제되었습니다.";
+        }
+        return "비밀번호가 일치하지 않습니다.";
     }
 }
