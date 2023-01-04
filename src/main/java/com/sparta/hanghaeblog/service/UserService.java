@@ -5,11 +5,11 @@ import com.sparta.hanghaeblog.dto.LoginRequestDto;
 import com.sparta.hanghaeblog.entity.User;
 import com.sparta.hanghaeblog.jwt.JwtUtil;
 import com.sparta.hanghaeblog.repository.UserRepository;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Service

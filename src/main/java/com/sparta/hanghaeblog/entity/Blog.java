@@ -1,10 +1,11 @@
 package com.sparta.hanghaeblog.entity;
 
 import com.sparta.hanghaeblog.dto.BlogRequestDto;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+
+import javax.persistence.*;
 
 @Getter
 @Entity(name = "BlogId")

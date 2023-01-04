@@ -1,10 +1,9 @@
 package com.sparta.hanghaeblog.entity;
 
-import jakarta.annotation.Nonnull;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +12,6 @@ import java.util.List;
 @Entity(name = "users")
 public class User {
     @Id
-    @Nonnull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -22,10 +20,6 @@ public class User {
 
     @Column(nullable = false)
     private String password;
-
-//    @Column(nullable = false)
-//    @Enumerated(value = EnumType.STRING)
-//    private UserRoleEnum role;
 
     @OneToMany
     List<Blog> blogs = new ArrayList<>();

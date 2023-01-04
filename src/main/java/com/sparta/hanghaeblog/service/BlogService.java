@@ -4,16 +4,16 @@ package com.sparta.hanghaeblog.service;
 import com.sparta.hanghaeblog.dto.BlogRequestDto;
 import com.sparta.hanghaeblog.dto.BlogResponseDto;
 import com.sparta.hanghaeblog.entity.Blog;
+import com.sparta.hanghaeblog.entity.User;
 import com.sparta.hanghaeblog.jwt.JwtUtil;
 import com.sparta.hanghaeblog.repository.BlogRepository;
 import com.sparta.hanghaeblog.repository.UserRepository;
 import io.jsonwebtoken.Claims;
-import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.sparta.hanghaeblog.entity.User;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -115,11 +115,14 @@ public class BlogService {
             }
 
             // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
-            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
-            );
-            blog.update(requestDto);
-        }
+//            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
+//                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+//            );
+            if(!jwtUtil.getUserInfoFromToken(token).getSubject().equals(blog.getUsername())) {
+                throw new IllegalArgumentException("게시물 작성자가 아닙니다.");
+            }
+        }blog.update(requestDto);
+
         return new BlogResponseDto(blog);
     }
 
@@ -127,7 +130,6 @@ public class BlogService {
     public String deleteBlog(Long id, HttpServletRequest request) {
         String token = jwtUtil.resolveToken(request);
         Claims claims;
-
         Blog blog = blogRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
         );
@@ -141,11 +143,11 @@ public class BlogService {
             }
 
             // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
-            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
-            );
-            return "삭제되었습니다.";
+            if(!jwtUtil.getUserInfoFromToken(token).getSubject().equals(blog.getUsername())) {
+                throw new IllegalArgumentException("게시물 작성자가 아닙니다.");
+            }
         }
-        return "비밀번호가 일치하지 않습니다.";
+        blog.softDelete(true);
+        return "삭제되었습니다.";
     }
 }

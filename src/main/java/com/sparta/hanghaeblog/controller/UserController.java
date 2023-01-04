@@ -3,7 +3,7 @@ package com.sparta.hanghaeblog.controller;
 import com.sparta.hanghaeblog.dto.JoinRequestDto;
 import com.sparta.hanghaeblog.dto.LoginRequestDto;
 import com.sparta.hanghaeblog.service.UserService;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
