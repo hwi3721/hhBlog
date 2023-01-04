@@ -2,12 +2,13 @@ package com.sparta.hanghaeblog.controller;
 
 
 import com.sparta.hanghaeblog.dto.BlogRequestDto;
-import com.sparta.hanghaeblog.dto.NewDto;
+import com.sparta.hanghaeblog.dto.BlogResponseDto;
 import com.sparta.hanghaeblog.service.BlogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -22,28 +23,31 @@ public class BlogController {
     }
 
     @PostMapping("/api/blogs")
-    public NewDto createMemo(@RequestBody BlogRequestDto requestDto) {
-        return blogService.createMemo(requestDto);
+    public BlogResponseDto createBlog(@RequestBody BlogRequestDto requestDto,
+                                      HttpServletRequest request) {
+        return blogService.createBlog(requestDto, request);
     }
 
     @GetMapping("/api/blogs")
-    public List<NewDto> getMemos() {
-        return blogService.getMemos();
+    public List<BlogResponseDto> getBlogs() {
+        return blogService.getBlogs();
     }
 
     @GetMapping("/api/blogs/{id}")
-    public NewDto getMemo(@PathVariable Long id) {
-        return blogService.getMemo(id);
+    public BlogResponseDto getBlog(@PathVariable Long id) {
+        return blogService.getBlog(id);
     }
 
-    @PutMapping("/api/blogs/{id}")
-    public NewDto updateMemo(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
-        return blogService.update(id, requestDto);
+    @PatchMapping("/api/blogs/{id}")
+    public BlogResponseDto updateBlog(@PathVariable Long id,
+                                      @RequestBody BlogRequestDto requestDto,
+                                      HttpServletRequest request) {
+        return blogService.update(id, requestDto, request);
     }
 
     @DeleteMapping("/api/blogs/{id}")
-    public String deleteMemo(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
-        return blogService.deleteMemo(id, requestDto);
+    public String deleteBlog(@PathVariable Long id, HttpServletRequest request) {
+        return blogService.deleteBlog(id, request);
 
     }
 }

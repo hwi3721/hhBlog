@@ -4,20 +4,16 @@ import com.sparta.hanghaeblog.dto.BlogRequestDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Getter
-@Entity
+@Entity(name = "BlogId")
 @NoArgsConstructor
+@ToString
 public class Blog extends Timestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
-    @Column(nullable = false)
-    private String username;
-
-    @Column(nullable = false)
-    private String password;
 
     @Column(nullable = false)
     private String title;
@@ -25,25 +21,35 @@ public class Blog extends Timestamped {
     @Column(nullable = false)
     private String contents;
 
-    public Blog(String username, String contents, String password, String title) {
-        this.title = title;
-        this.password = password;
-        this.username = username;
-        this.contents = contents;
+    private Boolean isDeleted;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="users")
+    private User user;
+
+
+    public Blog(BlogRequestDto blogrequestDto) {
+        this.contents = blogrequestDto.getContents();
+        this.title = blogrequestDto.getTitle();
     }
 
-    public Blog(BlogRequestDto requestDto) {
-        this.username = requestDto.getUsername();
-        this.password = requestDto.getPassword();
-        this.contents = requestDto.getContents();
-        this.title = requestDto.getTitle();
+    public Blog(BlogRequestDto blogRequestDto, User user){
+        this.title = blogRequestDto.getTitle();
+        this.contents = blogRequestDto.getContents();;
+        this.user = user;
+        this.isDeleted = null;
     }
 
     public void update(BlogRequestDto blogRequestDto) {
-        this.username = blogRequestDto.getUsername();
-        this.password = blogRequestDto.getPassword();
         this.contents = blogRequestDto.getContents();
         this.title = blogRequestDto.getTitle();
+    }
+
+    public String getUsername() {
+        return this.user.getUsername();
+    }
+    public void softDelete(Boolean b){
+        this.isDeleted = b;
     }
 
 
