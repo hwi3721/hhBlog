@@ -91,11 +91,15 @@ public class BlogService {
 //    }
     @Transactional
     public BlogResponseDto getBlog(Long id) {
-        Blog target = blogRepository.findById(id).orElseThrow(
+        Blog blog = blogRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
         );
+        if (blog.getIsDeleted() != null) {
+            throw new IllegalArgumentException("존재하지 않는 게시글입니다.");
+        }
 
-        return new BlogResponseDto(target);
+
+        return new BlogResponseDto(blog);
     }
 
     @Transactional
