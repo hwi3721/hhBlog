@@ -4,6 +4,9 @@
 
 
 API 명세서.
+
+
+이렇게 하는거 맞나..
 https://warped-shadow-541637.postman.co/workspace/Team-Workspace~2c875394-89dc-4299-8799-b32579f7329f/collection/25070444-46c5a810-4098-45f9-aa7a-4624d94277a9?action=share&creator=25070444
 
 
