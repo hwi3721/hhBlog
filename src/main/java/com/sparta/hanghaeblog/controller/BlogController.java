@@ -4,11 +4,11 @@ package com.sparta.hanghaeblog.controller;
 import com.sparta.hanghaeblog.dto.BlogRequestDto;
 import com.sparta.hanghaeblog.dto.BlogResponseDto;
 import com.sparta.hanghaeblog.service.BlogService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
