@@ -13,10 +13,10 @@ import javax.validation.constraints.Size;
 public class JoinRequestDto {
 
     @Size(min=4,max=10)
-    @Pattern(regexp = "[0-9a-z]+")
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]")   //  (?=.*[a-z])
     private String username;
 
     @Size(min = 8, max = 15)
-    @Pattern(regexp = "[0-9a-zA-Z!@#$%^&*(),.?\"/~`:{}|<>]+")
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]")
     private String password;
 }
